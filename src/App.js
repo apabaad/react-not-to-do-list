@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { AddTaskForm } from "./components/add-task-form/AddTaskForm";
 import { TaskLists } from "./components/task-lists/TaskLists";
 import { NotToDoLists } from "./components/task-lists/NotToDoLists";
 import { AlertDisplay } from "./components/alert/AlertDisplay";
+import { postTask, fetchAllTask } from "./apis/taskApi";
 
 import "./App.css";
 
@@ -13,13 +14,25 @@ const App = () => {
 	const [hrsError, setHrsError] = useState(false);
 	const [indexToDeleteFromTask, setIndexToDeleteFromTask] = useState([]);
 	const [indexToDeleteFromBadTask, setIndexToDeleteFromBadTask] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const taskHrs = tasks.reduce((subttl, item) => subttl + +item.hr, 0);
 	const badHrs = badTasks.reduce((sbuttl, item) => sbuttl + +item.hr, 0);
 	const totalHrs = taskHrs + badHrs;
 	const ttlPwK = 168;
 
-	const handleOnSubmit = data => {
+	useEffect(() => {
+		setIsLoading(true);
+		const loadTask = async () => {
+			const { result } = await fetchAllTask();
+			setIsLoading(false);
+			setTasks(result);
+		};
+
+		loadTask();
+	}, []);
+
+	const handleOnSubmit = async data => {
 		if (totalHrs + +data.hr > ttlPwK) {
 			setHrsError(true);
 			return;
@@ -27,6 +40,8 @@ const App = () => {
 		setTasks([...tasks, data]);
 
 		//send the data to the server
+		const result = await postTask(data);
+		console.log(result, "form api");
 	};
 
 	// mark task list to bad task list
@@ -109,6 +124,7 @@ const App = () => {
 
 	console.log(indexToDeleteFromBadTask);
 
+	console.log("UI loaded");
 	return (
 		<div className="wrapper text-center">
 			<Container>
@@ -118,6 +134,7 @@ const App = () => {
 					</Col>
 				</Row>
 				<hr />
+
 				{hrsError && (
 					<AlertDisplay
 						color="danger"
@@ -127,6 +144,7 @@ const App = () => {
 
 				<AddTaskForm handleSubmit={handleOnSubmit} />
 				<hr />
+				{isLoading && <Spinner variant="primary" animation="border" />}
 				<Row>
 					<Col md="6">
 						<TaskLists
