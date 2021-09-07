@@ -1,12 +1,12 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Table, Button } from "react-bootstrap";
+import { taskSwitcher } from "./taskAction";
 
-export const TaskLists = ({
-	tasks,
-	markAsBadList,
-	handleOnTaskClicked,
-	indexToDeleteFromTask,
-}) => {
+export const TaskLists = ({ handleOnTaskClicked, indexToDeleteFromTask }) => {
+	const dispatch = useDispatch();
+	const { taskLists } = useSelector(state => state.task);
+
 	return (
 		<div>
 			<h2>Task Lists</h2>
@@ -19,21 +19,25 @@ export const TaskLists = ({
 					</tr>
 				</thead>
 				<tbody>
-					{tasks.map((item, i) => (
+					{taskLists.map((item, i) => (
 						<tr key={i}>
 							<td>
 								<input
 									type="checkbox"
-									defaultValue={i}
+									defaultValue={item._id}
 									// checked={true}
-									checked={indexToDeleteFromTask.includes(i)}
+									checked={indexToDeleteFromTask.includes(item._id)}
 									onChange={handleOnTaskClicked}
 								/>{" "}
 								<label> {item.task}</label>
 							</td>
 							<td>{item.hr}</td>
 							<td>
-								<Button onClick={() => markAsBadList(i)}>
+								<Button
+									onClick={() =>
+										dispatch(taskSwitcher({ id: item._id, todo: false }))
+									}
+								>
 									Mark As Not To Do
 								</Button>
 							</td>

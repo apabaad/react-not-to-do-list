@@ -1,14 +1,17 @@
 import React from "react";
 import { Table, Button, Alert } from "react-bootstrap";
 import { AlertDisplay } from "../alert/AlertDisplay";
+import { useSelector, useDispatch } from "react-redux";
+import { taskSwitcher } from "./taskAction";
 
 export const NotToDoLists = ({
-	badTasks,
-	markAsTaskList,
-	badHrs,
 	handleOnBadTaskClicked,
 	indexToDeleteFromBadTask,
 }) => {
+	const dispatch = useDispatch();
+	const { badLists } = useSelector(state => state.task);
+	const badHrs = badLists.reduce((subtl, item) => subtl + item.hr, 0);
+
 	return (
 		<div>
 			<h2>Bad Task Lists</h2>
@@ -21,20 +24,31 @@ export const NotToDoLists = ({
 					</tr>
 				</thead>
 				<tbody>
-					{badTasks.map((item, i) => (
+					{badLists.map((item, i) => (
 						<tr key={i}>
 							<td>
 								<input
 									type="checkbox"
-									defaultValue={i}
-									checked={indexToDeleteFromBadTask.includes(i)}
+									defaultValue={item._id}
+									checked={indexToDeleteFromBadTask.includes(item._id)}
 									onChange={handleOnBadTaskClicked}
 								/>{" "}
 								<label> {item.task}</label>
 							</td>
 							<td>{item.hr}</td>
 							<td>
-								<Button onClick={() => markAsTaskList(i)}>Mark As To Do</Button>
+								<Button
+									onClick={() =>
+										dispatch(
+											taskSwitcher({
+												id: item._id,
+												todo: true,
+											})
+										)
+									}
+								>
+									Mark As To Do
+								</Button>
 							</td>
 						</tr>
 					))}

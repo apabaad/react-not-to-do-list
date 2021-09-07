@@ -21,6 +21,34 @@ export const postTask = async newTaks => {
 export const fetchAllTask = async () => {
 	try {
 		const { data } = await axios.get(rootAPI);
+
+		return data;
+	} catch (error) {
+		return {
+			status: "error",
+			message: error.message,
+		};
+	}
+};
+
+//delete items
+export const deleteTask = async ids => {
+	try {
+		const { data } = await axios.delete(rootAPI, { data: ids });
+		console.log(data);
+		return data;
+	} catch (error) {
+		return {
+			status: "error",
+			message: error.message,
+		};
+	}
+};
+
+//update items
+export const updateTask = async obj => {
+	try {
+		const { data } = await axios.patch(rootAPI, obj);
 		console.log(data);
 		return data;
 	} catch (error) {
